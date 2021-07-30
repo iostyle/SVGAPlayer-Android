@@ -314,6 +314,17 @@ class SVGAParser(context: Context?) {
         closeInputStream: Boolean = false,
         alias: String
     ) {
+        this.decodeFromInputStream(inputStream, cacheKey, callback, closeInputStream, alias, false)
+    }
+
+    fun decodeFromInputStream(
+        inputStream: InputStream,
+        cacheKey: String,
+        callback: ParseCompletion?,
+        closeInputStream: Boolean = false,
+        alias: String,
+        audioMute: Boolean = false
+    ) {
         if (mContext == null) {
             LogUtils.error(TAG, "在配置 SVGAParser context 前, 无法解析 SVGA 文件。")
             return
@@ -345,7 +356,8 @@ class SVGAParser(context: Context?) {
                                 MovieEntity.ADAPTER.decode(it),
                                 File(cacheKey),
                                 mFrameWidth,
-                                mFrameHeight
+                                mFrameHeight,
+                                audioMute
                             )
                             videoItem.prepare {
                                 LogUtils.info(TAG, "decode from input stream, inflate end")

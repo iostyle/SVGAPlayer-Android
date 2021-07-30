@@ -26,7 +26,6 @@ class SVGAVideoEntity {
 
     var antiAlias = true
     var movieItem: MovieEntity? = null
-    var muteAudio = false
 
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)
         private set
@@ -44,13 +43,17 @@ class SVGAVideoEntity {
     private var mCacheDir: File
     private var mFrameHeight = 0
     private var mFrameWidth = 0
+    private var muteAudio = false
 
     constructor(json: JSONObject, cacheDir: File) : this(json, cacheDir, 0, 0)
 
-    constructor(json: JSONObject, cacheDir: File, frameWidth: Int, frameHeight: Int) {
+    constructor(json: JSONObject, cacheDir: File, frameWidth: Int, frameHeight: Int): this(json, cacheDir, frameWidth, frameHeight,false)
+
+    constructor(json: JSONObject, cacheDir: File, frameWidth: Int, frameHeight: Int, mute: Boolean) {
         mFrameWidth = frameWidth
         mFrameHeight = frameHeight
         mCacheDir = cacheDir
+        muteAudio = mute
         val movieJsonObject = json.optJSONObject("movie") ?: return
         setupByJson(movieJsonObject)
         try {
@@ -75,11 +78,14 @@ class SVGAVideoEntity {
 
     constructor(entity: MovieEntity, cacheDir: File) : this(entity, cacheDir, 0, 0)
 
-    constructor(entity: MovieEntity, cacheDir: File, frameWidth: Int, frameHeight: Int) {
+    constructor(entity: MovieEntity, cacheDir: File, frameWidth: Int, frameHeight: Int) : this(entity, cacheDir, frameWidth, frameHeight,false)
+
+    constructor(entity: MovieEntity, cacheDir: File, frameWidth: Int, frameHeight: Int, mute: Boolean) {
         this.mFrameWidth = frameWidth
         this.mFrameHeight = frameHeight
         this.mCacheDir = cacheDir
         this.movieItem = entity
+        this.muteAudio = mute
         entity.params?.let(this::setupByMovie)
         try {
             parserImages(entity)
@@ -190,11 +196,11 @@ class SVGAVideoEntity {
         val audiosFileMap = generateAudioFileMap(entity)
         /**
          * repair audio error it not  callback
-         audiosFileMap.size==0  soundPool?.load will not go
-         setOnLoadCompleteListener will not run
-         completionBlock  not  run  cannot callback
+        audiosFileMap.size==0  soundPool?.load will not go
+        setOnLoadCompleteListener will not run
+        completionBlock  not  run  cannot callback
          */
-        if(audiosFileMap.size==0){
+        if (audiosFileMap.size == 0) {
             run(completionBlock)
         }
         this.audioList = entity.audios.map { audio ->
@@ -271,11 +277,11 @@ class SVGAVideoEntity {
 
     private fun generateSoundPool(entity: MovieEntity) = if (Build.VERSION.SDK_INT >= 21) {
         val attributes = AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .build()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .build()
         SoundPool.Builder().setAudioAttributes(attributes)
-                .setMaxStreams(12.coerceAtMost(entity.audios.count()))
-                .build()
+            .setMaxStreams(12.coerceAtMost(entity.audios.count()))
+            .build()
     } else {
         SoundPool(12.coerceAtMost(entity.audios.count()), AudioManager.STREAM_MUSIC, 0)
     }
