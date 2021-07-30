@@ -26,6 +26,7 @@ class SVGAVideoEntity {
 
     var antiAlias = true
     var movieItem: MovieEntity? = null
+    var muteAudio = false
 
     var videoSize = SVGARect(0.0, 0.0, 0.0, 0.0)
         private set
@@ -181,7 +182,7 @@ class SVGAVideoEntity {
     }
 
     private fun setupAudios(entity: MovieEntity, completionBlock: () -> Unit) {
-        if (entity.audios == null || entity.audios.isEmpty()) {
+        if (entity.audios == null || entity.audios.isEmpty() || muteAudio) {
             run(completionBlock)
             return
         }
